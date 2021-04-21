@@ -309,6 +309,12 @@ def main():
         logger.info("Training new model from scratch")
         model = AutoModelForCausalLM.from_config(config)
 
+    # special_tokens_dict = {'bot_token': '<BOT>', 'eot_token': '<EOT>', 'bop_token': '<BOP>', 'eop_token': '<EOP>', 'boc_token': '<BOC>', 'eoc_token': '<EOC>', 'pad_token': '<PAD>'}
+    # num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
+    special_tokens_dict = {'bos_token': '<BOC>', 'eos_token': '<EOC>', 'pad_token': '<PAD>'}
+    num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
+    print(tokenizer)
+
     model.resize_token_embeddings(len(tokenizer))
 
     # Preprocessing the datasets.
