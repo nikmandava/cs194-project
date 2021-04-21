@@ -16,6 +16,7 @@
 # limitations under the License.
 """ Conditional text generation with the auto-regressive models of the library (GPT/GPT-2/CTRL/Transformer-XL/XLNet)
 """
+from argparse import Namespace
 
 
 import argparse
@@ -150,53 +151,58 @@ def adjust_length_to_model(length, max_sequence_length):
         length = MAX_LENGTH  # avoid infinite loop
     return length
 
+def generate_text(prompt):
+    args = Namespace(fp16=False, k=50, length=300, model_name_or_path='/Users/nikmandava/Downloads/checkpoint-82000', model_type='gpt2', no_cuda=False, num_return_sequences=5, p=0.9, padding_text='', prefix='', prompt = prompt, repetition_penalty=1.0, seed=42, stop_token='<EOC>', temperature=1.0, xlm_language='')
+    return main(args) 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model_type",
-        default=None,
-        type=str,
-        required=True,
-        help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()),
-    )
-    parser.add_argument(
-        "--model_name_or_path",
-        default=None,
-        type=str,
-        required=True,
-        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(MODEL_CLASSES.keys()),
-    )
+def main(args):
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--model_type",
+    #     default=None,
+    #     type=str,
+    #     required=True,
+    #     help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()),
+    # )
+    # parser.add_argument(
+    #     "--model_name_or_path",
+    #     default=None,
+    #     type=str,
+    #     required=True,
+    #     help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(MODEL_CLASSES.keys()),
+    # )
 
-    parser.add_argument("--prompt", type=str, default="")
-    parser.add_argument("--length", type=int, default=20)
-    parser.add_argument("--stop_token", type=str, default=None, help="Token at which text generation is stopped")
+    # parser.add_argument("--prompt", type=str, default="")
+    # parser.add_argument("--length", type=int, default=20)
+    # parser.add_argument("--stop_token", type=str, default=None, help="Token at which text generation is stopped")
 
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        default=1.0,
-        help="temperature of 1.0 has no effect, lower tend toward greedy sampling",
-    )
-    parser.add_argument(
-        "--repetition_penalty", type=float, default=1.0, help="primarily useful for CTRL model; in that case, use 1.2"
-    )
-    parser.add_argument("--k", type=int, default=0)
-    parser.add_argument("--p", type=float, default=0.9)
+    # parser.add_argument(
+    #     "--temperature",
+    #     type=float,
+    #     default=1.0,
+    #     help="temperature of 1.0 has no effect, lower tend toward greedy sampling",
+    # )
+    # parser.add_argument(
+    #     "--repetition_penalty", type=float, default=1.0, help="primarily useful for CTRL model; in that case, use 1.2"
+    # )
+    # parser.add_argument("--k", type=int, default=0)
+    # parser.add_argument("--p", type=float, default=0.9)
 
-    parser.add_argument("--prefix", type=str, default="", help="Text added prior to input.")
-    parser.add_argument("--padding_text", type=str, default="", help="Deprecated, the use of `--prefix` is preferred.")
-    parser.add_argument("--xlm_language", type=str, default="", help="Optional language when used with the XLM model.")
+    # parser.add_argument("--prefix", type=str, default="", help="Text added prior to input.")
+    # parser.add_argument("--padding_text", type=str, default="", help="Deprecated, the use of `--prefix` is preferred.")
+    # parser.add_argument("--xlm_language", type=str, default="", help="Optional language when used with the XLM model.")
 
-    parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
-    parser.add_argument("--no_cuda", action="store_true", help="Avoid using CUDA when available")
-    parser.add_argument("--num_return_sequences", type=int, default=1, help="The number of samples to generate.")
-    parser.add_argument(
-        "--fp16",
-        action="store_true",
-        help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit",
-    )
-    args = parser.parse_args()
+    # parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
+    # parser.add_argument("--no_cuda", action="store_true", help="Avoid using CUDA when available")
+    # parser.add_argument("--num_return_sequences", type=int, default=1, help="The number of samples to generate.")
+    # parser.add_argument(
+    #     "--fp16",
+    #     action="store_true",
+    #     help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit",
+    # )
+    # args = parser.parse_args()
+
+    length_prompt = len(args.prompt)
 
     args.device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
     args.n_gpu = 0 if args.no_cuda else torch.cuda.device_count()
@@ -283,7 +289,7 @@ def main():
         generated_sequences.append(total_sequence)
         print(total_sequence)
 
-    return generated_sequences
+    return generated_sequences[0][length_prompt:]
 
 
 if __name__ == "__main__":
